@@ -6,37 +6,60 @@
 	let padding: number = 20;
 
 	onMount(() => {
-		canvas.width = window.innerWidth - padding;
-		canvas.height = window.innerHeight - padding;
+		canvas.width = 800 + padding * 2;
+		canvas.height = 600 + padding * 2;
 		ctx = canvas.getContext('2d')!;
 		drawBreadboard();
+		canvas.addEventListener('click', handleClick);
 	});
+	let gapX: number;
+	let gapY: number;
+	let holeRadius: number = 5;
 
 	function drawBreadboard() {
-		const width: number = canvas.width;
-		const height: number = canvas.height;
+		const width: number = canvas.width - padding * 2;
+		const height: number = canvas.height - padding * 2;
 
 		// Set background color
 		ctx.fillStyle = '#f0f0f0';
-		ctx.fillRect(0, 0, width, height);
+		ctx.fillRect(padding, padding, width, height);
 
 		// Draw holes
-		const rows: number = 10; // Adjust based on your breadboard size
-		const cols: number = 30; // Adjust based on your breadboard size
-		const holeRadius: number = 3;
-		const gap: number = 10;
+		const rows: number = 10;
+		const cols: number = 30;
+		gapX = (width - holeRadius * 2) / (cols - 1);
+		gapY = (height - holeRadius * 2) / (rows - 1);
 
 		ctx.fillStyle = '#000';
 		for (let row = 0; row < rows; row++) {
 			for (let col = 0; col < cols; col++) {
-				const x: number = gap + col * (2 * holeRadius + gap);
-				const y: number = gap + row * (2 * holeRadius + gap);
+				const x: number = padding + holeRadius + col * gapX;
+				const y: number = padding + holeRadius + row * gapY;
 				ctx.beginPath();
 				ctx.arc(x, y, holeRadius, 0, 2 * Math.PI);
 				ctx.fill();
 			}
 		}
 	}
+
+	function handleClick(event: MouseEvent) {
+		const x = event.clientX - canvas.offsetLeft - padding;
+		const y = event.clientY - canvas.offsetTop - padding;
+
+		const dotX = Math.round((x - holeRadius) / gapX);
+		const dotY = Math.round((y - holeRadius) / gapY);
+
+		console.log(`Dot at (${dotX}, ${dotY}) was clicked`);
+	}
 </script>
 
-<canvas bind:this={canvas} width="300" height="200"></canvas>
+<canvas id="board" bind:this={canvas}></canvas>
+
+<style>
+	#board {
+		margin: auto;
+		display: block;
+		border: 1px solid #ccc;
+		background-color: #f0f0f0;
+	}
+</style>
